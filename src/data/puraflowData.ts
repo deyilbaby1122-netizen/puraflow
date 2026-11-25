@@ -8,10 +8,10 @@ import {
 
 export const PURAFLOW_IMAGES = {
   heroAlps: '/src/assets/images/puraflow_hero_alps_1795601891775.jpg',
-  everyday: '/src/assets/images/puraflow_bottle_everyday_1795601891500.jpg',
-  prestigeGlass: '/src/assets/images/puraflow_bottle_glass_1795601892502.jpg',
-  sparkling: '/src/assets/images/puraflow_bottle_sparkling_1795601893339.jpg',
-  limited: '/src/assets/images/puraflow_bottle_limited_1795601893393.jpg',
+  everyday: '/src/assets/images/puraflow_branded_everyday_1795603612925.jpg',
+  prestigeGlass: '/src/assets/images/puraflow_branded_glass_1795603614045.jpg',
+  sparkling: '/src/assets/images/puraflow_branded_sparkling_1795603614708.jpg',
+  limited: '/src/assets/images/puraflow_branded_limited_1795603615322.jpg',
   tennis: '/src/assets/images/puraflow_lifestyle_tennis_1795601894737.jpg',
 };
 

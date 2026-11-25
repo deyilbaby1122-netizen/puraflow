@@ -11,7 +11,7 @@ export const ResilientImage: React.FC<ResilientImageProps> = ({
   src,
   alt,
   className = '',
-  fallbackTitle = 'Pure Flow Vessel',
+  fallbackTitle = 'PuraFlow Mineral Water',
 }) => {
   const [hasError, setHasError] = useState(false);
 
