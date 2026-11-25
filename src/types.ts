@@ -1,116 +1,70 @@
-export type RoutePath =
+export type PageRoute =
   | { page: 'home' }
-  | { page: 'collection'; category?: string }
-  | { page: 'product'; slug: string }
-  | { page: 'bespoke' }
-  | { page: 'engineering' }
-  | { page: 'journal'; slug?: string }
-  | { page: 'boutiques'; tab?: 'ateliers' | 'orders' };
+  | { page: 'water' }
+  | { page: 'products'; category?: ProductRangeCategory }
+  | { page: 'sustainability' }
+  | { page: 'story' }
+  | { page: 'news'; slug?: string };
 
-export type ProductCategory = 'Titanium' | 'Glass' | 'Ceramic' | 'Accessories';
+export type ProductRangeCategory =
+  | 'All'
+  | 'Everyday'
+  | 'Sparkling'
+  | 'Prestige Glass'
+  | 'Limited Editions';
 
-export interface ProductFinish {
-  id: string;
+export interface MineralElement {
   name: string;
-  hex: string;
-  image: string;
+  symbol: string;
+  mgPerLitre: number;
+  role: string;
 }
 
-export interface ProductCapacityOption {
+export interface BottleVariant {
+  sizeLabel: string;
   ml: number;
-  label: string;
-  priceDelta: number;
-  heightMm: number;
-  diameterMm: number;
-  weightGrams: number;
+  material: string;
+  recycledContent: string;
+  idealFor: string;
 }
 
-export interface Product {
+export interface PuraFlowProduct {
   id: string;
   slug: string;
   name: string;
-  series: string;
-  category: ProductCategory;
-  basePrice: number;
-  shortDescription: string;
-  longDescription: string;
-  coldHours: number;
-  hotHours: number;
-  materialSummary: string;
-  availability: 'In Stock' | 'Small Batch' | 'Made to Order';
-  finishes: ProductFinish[];
-  capacities: ProductCapacityOption[];
-  specs: {
-    alloy: string;
-    seal: string;
-    mouthDiameterMm: number;
-    origin: string;
-    care: string;
-  };
-}
-
-export interface CartItem {
-  cartItemId: string;
-  productId: string;
-  name: string;
-  series: string;
+  range: Exclude<ProductRangeCategory, 'All'>;
+  tagline: string;
+  description: string;
   image: string;
-  finishName: string;
-  finishHex: string;
-  capacityLabel: string;
-  unitPrice: number;
-  quantity: number;
-  monogram?: string;
-  isBespoke?: boolean;
-  bespokeDetails?: {
-    silhouette: string;
-    capAlloy: string;
-    engravingStyle: string;
-  };
+  accentColor: string;
+  variants: BottleVariant[];
+  highlights: string[];
 }
 
-export interface OrderRecord {
-  orderNumber: string;
-  createdAt: string;
-  status: 'Confirmed' | 'Engraving & Inspection' | 'Dispatched via Courier' | 'Delivered';
-  customerName: string;
-  email: string;
-  shippingAddress: string;
-  city: string;
-  postalCode: string;
-  country: string;
-  deliveryMethod: 'Express Courier' | 'Private Concierge' | 'Atelier Pickup';
-  paymentMethod: 'Card' | 'Concierge Cash on Delivery';
-  items: CartItem[];
-  subtotal: number;
-  discount: number;
-  shippingFee: number;
-  total: number;
-  giftNote?: string;
+export interface JourneyStage {
+  step: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  metric: string;
 }
 
-export interface JournalArticle {
+export interface SustainabilityPillar {
+  id: string;
+  title: string;
+  metric: string;
+  metricLabel: string;
+  summary: string;
+  details: string[];
+}
+
+export interface NewsArticle {
   slug: string;
   title: string;
-  category: string;
-  publishedAt: string;
+  category: 'Collaborations' | 'Sports' | 'Sustainability' | 'Fine Dining';
+  date: string;
   readTime: string;
-  author: string;
-  authorRole: string;
-  coverImage: string;
+  image: string;
   excerpt: string;
-  pullQuote: string;
   body: string[];
-  featuredProductSlug: string;
-}
-
-export interface BoutiqueLocation {
-  id: string;
-  city: string;
-  district: string;
-  address: string;
-  hours: string;
-  phone: string;
-  architectNote: string;
-  services: string[];
 }

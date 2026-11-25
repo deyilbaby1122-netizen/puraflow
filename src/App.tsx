@@ -1,232 +1,118 @@
 import React, { useEffect, useState } from 'react';
-import { CartDrawer } from './components/CartDrawer';
+import { FindPuraFlowModal } from './components/FindPuraFlowModal';
 import { Footer } from './components/Footer';
 import { Header } from './components/Header';
-import { SAMPLE_ORDERS } from './data/catalog';
-import { BespokePage } from './pages/BespokePage';
-import { BoutiquesPage } from './pages/BoutiquesPage';
-import { CollectionPage } from './pages/CollectionPage';
-import { EngineeringPage } from './pages/EngineeringPage';
 import { HomePage } from './pages/HomePage';
-import { JournalPage } from './pages/JournalPage';
-import { ProductDetailPage } from './pages/ProductDetailPage';
-import { CartItem, OrderRecord, Product, RoutePath } from './types';
+import { NewsEventsPage } from './pages/NewsEventsPage';
+import { OurStoryPage } from './pages/OurStoryPage';
+import { OurWaterPage } from './pages/OurWaterPage';
+import { ProductsPage } from './pages/ProductsPage';
+import { SustainabilityPage } from './pages/SustainabilityPage';
+import { PageRoute, ProductRangeCategory } from './types';
 
-function parseHashToRoute(hash: string): RoutePath {
+function parseHash(hash: string): PageRoute {
   const clean = hash.replace(/^#\/?/, '').trim();
   if (!clean) return { page: 'home' };
-
-  const [segment, param] = clean.split('/');
-  if (segment === 'collection') {
-    return { page: 'collection', category: param ? decodeURIComponent(param) : undefined };
-  }
-  if (segment === 'product' && param) {
-    return { page: 'product', slug: decodeURIComponent(param) };
-  }
-  if (segment === 'bespoke') return { page: 'bespoke' };
-  if (segment === 'engineering') return { page: 'engineering' };
-  if (segment === 'journal') {
-    return { page: 'journal', slug: param ? decodeURIComponent(param) : undefined };
-  }
-  if (segment === 'boutiques') {
+  const [seg, param] = clean.split('/');
+  if (seg === 'water') return { page: 'water' };
+  if (seg === 'products') {
     return {
-      page: 'boutiques',
-      tab: param === 'orders' ? 'orders' : 'ateliers',
+      page: 'products',
+      category: param ? (decodeURIComponent(param) as ProductRangeCategory) : 'All',
     };
+  }
+  if (seg === 'sustainability') return { page: 'sustainability' };
+  if (seg === 'story') return { page: 'story' };
+  if (seg === 'news') {
+    return { page: 'news', slug: param ? decodeURIComponent(param) : undefined };
   }
   return { page: 'home' };
 }
 
-function routeToHash(route: RoutePath): string {
+function toHash(route: PageRoute): string {
   switch (route.page) {
     case 'home':
       return '#/';
-    case 'collection':
-      return route.category
-        ? `#/collection/${encodeURIComponent(route.category)}`
-        : '#/collection';
-    case 'product':
-      return `#/product/${encodeURIComponent(route.slug)}`;
-    case 'bespoke':
-      return '#/bespoke';
-    case 'engineering':
-      return '#/engineering';
-    case 'journal':
-      return route.slug ? `#/journal/${encodeURIComponent(route.slug)}` : '#/journal';
-    case 'boutiques':
-      return route.tab === 'orders' ? '#/boutiques/orders' : '#/boutiques';
+    case 'water':
+      return '#/water';
+    case 'products':
+      return route.category && route.category !== 'All'
+        ? `#/products/${encodeURIComponent(route.category)}`
+        : '#/products';
+    case 'sustainability':
+      return '#/sustainability';
+    case 'story':
+      return '#/story';
+    case 'news':
+      return route.slug ? `#/news/${encodeURIComponent(route.slug)}` : '#/news';
   }
 }
 
 export default function App() {
-  const [route, setRoute] = useState<RoutePath>(() =>
-    parseHashToRoute(typeof window !== 'undefined' ? window.location.hash : '')
+  const [route, setRoute] = useState<PageRoute>(() =>
+    parseHash(typeof window !== 'undefined' ? window.location.hash : '')
   );
-  const [cartOpen, setCartOpen] = useState(false);
-
-  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
-    try {
-      const saved = localStorage.getItem('pure_flow_bag');
-      return saved ? (JSON.parse(saved) as CartItem[]) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  const [orders, setOrders] = useState<OrderRecord[]>(() => {
-    try {
-      const saved = localStorage.getItem('pure_flow_orders');
-      return saved ? (JSON.parse(saved) as OrderRecord[]) : SAMPLE_ORDERS;
-    } catch {
-      return SAMPLE_ORDERS;
-    }
-  });
+  const [inquiryOpen, setInquiryOpen] = useState(false);
+  const [selectedRegion, setSelectedRegion] = useState('INT');
 
   useEffect(() => {
-    try {
-      localStorage.setItem('pure_flow_bag', JSON.stringify(cartItems));
-    } catch {
-      // ignore storage quota failures
-    }
-  }, [cartItems]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('pure_flow_orders', JSON.stringify(orders));
-    } catch {
-      // ignore storage quota failures
-    }
-  }, [orders]);
-
-  useEffect(() => {
-    const onHashChange = () => {
-      setRoute(parseHashToRoute(window.location.hash));
+    const handleHashChange = () => {
+      setRoute(parseHash(window.location.hash));
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
-    window.addEventListener('hashchange', onHashChange);
-    return () => window.removeEventListener('hashchange', onHashChange);
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  const navigate = (nextRoute: RoutePath) => {
-    const nextHash = routeToHash(nextRoute);
+  const navigate = (next: PageRoute) => {
+    const nextHash = toHash(next);
     if (window.location.hash !== nextHash) {
       window.location.hash = nextHash;
     }
-    setRoute(nextRoute);
+    setRoute(next);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleAddToCart = (incoming: CartItem) => {
-    setCartItems((prev) => {
-      const existing = prev.find((item) => item.cartItemId === incoming.cartItemId);
-      if (existing) {
-        return prev.map((item) =>
-          item.cartItemId === incoming.cartItemId
-            ? { ...item, quantity: item.quantity + incoming.quantity }
-            : item
-        );
-      }
-      return [...prev, incoming];
-    });
-    setCartOpen(true);
-  };
-
-  const handleQuickAdd = (product: Product, finishIndex: number) => {
-    const finish = product.finishes[finishIndex] || product.finishes[0];
-    const cap = product.capacities[0];
-    handleAddToCart({
-      cartItemId: `${product.id}-${finish.id}-${cap.ml}-plain`,
-      productId: product.id,
-      name: product.name,
-      series: product.series,
-      image: finish.image,
-      finishName: finish.name,
-      finishHex: finish.hex,
-      capacityLabel: cap.label,
-      unitPrice: product.basePrice + cap.priceDelta,
-      quantity: 1,
-    });
-  };
-
-  const handleUpdateQuantity = (cartItemId: string, delta: number) => {
-    setCartItems((prev) =>
-      prev
-        .map((item) =>
-          item.cartItemId === cartItemId
-            ? { ...item, quantity: item.quantity + delta }
-            : item
-        )
-        .filter((item) => item.quantity > 0)
-    );
-  };
-
-  const handleRemoveItem = (cartItemId: string) => {
-    setCartItems((prev) => prev.filter((item) => item.cartItemId !== cartItemId));
-  };
-
-  const handlePlaceOrder = (order: OrderRecord) => {
-    setOrders((prev) => [order, ...prev]);
-    setCartItems([]);
-  };
-
-  const totalBagCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-
   return (
-    <div className="min-h-screen flex flex-col bg-[#F6F5F1] text-[#121417]">
+    <div className="min-h-screen flex flex-col bg-white text-[#1A202C]">
       <Header
         currentRoute={route}
         onNavigate={navigate}
-        cartCount={totalBagCount}
-        onOpenCart={() => setCartOpen(true)}
+        onOpenInquiry={() => setInquiryOpen(true)}
       />
 
       <main className="flex-1">
         {route.page === 'home' && (
-          <HomePage onNavigate={navigate} onQuickAdd={handleQuickAdd} />
+          <HomePage
+            onNavigate={navigate}
+            onOpenInquiry={() => setInquiryOpen(true)}
+          />
         )}
-        {route.page === 'collection' && (
-          <CollectionPage
-            key={route.category || 'all'}
+        {route.page === 'water' && <OurWaterPage onNavigate={navigate} />}
+        {route.page === 'products' && (
+          <ProductsPage
+            key={route.category || 'All'}
             initialCategory={route.category}
-            onNavigate={navigate}
-            onQuickAdd={handleQuickAdd}
+            onOpenInquiry={() => setInquiryOpen(true)}
           />
         )}
-        {route.page === 'product' && (
-          <ProductDetailPage
-            slug={route.slug}
-            onNavigate={navigate}
-            onAddToCart={handleAddToCart}
-          />
-        )}
-        {route.page === 'bespoke' && (
-          <BespokePage onAddToCart={handleAddToCart} />
-        )}
-        {route.page === 'engineering' && (
-          <EngineeringPage onNavigate={navigate} />
-        )}
-        {route.page === 'journal' && (
-          <JournalPage activeSlug={route.slug} onNavigate={navigate} />
-        )}
-        {route.page === 'boutiques' && (
-          <BoutiquesPage
-            key={route.tab || 'ateliers'}
-            initialTab={route.tab}
-            orders={orders}
-          />
+        {route.page === 'sustainability' && <SustainabilityPage />}
+        {route.page === 'story' && <OurStoryPage onNavigate={navigate} />}
+        {route.page === 'news' && (
+          <NewsEventsPage activeSlug={route.slug} onNavigate={navigate} />
         )}
       </main>
 
-      <Footer onNavigate={navigate} />
+      <Footer
+        onNavigate={navigate}
+        selectedRegion={selectedRegion}
+        onChangeRegion={setSelectedRegion}
+      />
 
-      <CartDrawer
-        isOpen={cartOpen}
-        onClose={() => setCartOpen(false)}
-        items={cartItems}
-        onUpdateQuantity={handleUpdateQuantity}
-        onRemoveItem={handleRemoveItem}
-        onPlaceOrder={handlePlaceOrder}
-        onViewOrderTracking={() => navigate({ page: 'boutiques', tab: 'orders' })}
+      <FindPuraFlowModal
+        isOpen={inquiryOpen}
+        onClose={() => setInquiryOpen(false)}
+        onNavigate={navigate}
       />
     </div>
   );
